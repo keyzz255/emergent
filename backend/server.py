@@ -170,12 +170,26 @@ async def get_stream_link(request: StreamRequest):
             if chapters and len(chapters) > 0:
                 chapter = chapters[0]
                 if chapter.get("cdnList") and len(chapter["cdnList"]) > 0:
+                    cdn = chapter["cdnList"][0]
+                    # Extract video URL from videoPathList - prefer 720p as default
+                    video_url = None
+                    if cdn.get("videoPathList"):
+                        # Find 720p quality first, then fallback to others
+                        for video in cdn["videoPathList"]:
+                            if video.get("quality") == 720 and video.get("isDefault"):
+                                video_url = video.get("videoPath")
+                                break
+                        # If no default 720p, get first available
+                        if not video_url and cdn["videoPathList"]:
+                            video_url = cdn["videoPathList"][0].get("videoPath")
+                    
                     return {
                         "success": True,
-                        "stream_url": chapter["cdnList"][0],
+                        "stream_url": video_url,
                         "episode": request.episode,
                         "book_id": request.book_id,
-                        "chapter_info": chapter
+                        "chapter_info": chapter,
+                        "available_qualities": [v.get("quality") for v in cdn.get("videoPathList", [])]
                     }
         
         return {"success": False, "message": "Stream link not found"}
