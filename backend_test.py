@@ -102,6 +102,61 @@ class DramaBoxAPITester:
             self.log_test("Search Dramas", False, str(e))
             return False, {}
 
+    def test_categories(self):
+        """Test getting drama categories"""
+        try:
+            response = requests.get(f"{self.api_url}/dramas/categories", timeout=30)
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}"
+            
+            if success:
+                data = response.json()
+                if data.get("success") and data.get("categories"):
+                    category_count = len(data["categories"])
+                    details += f", Found {category_count} categories"
+                    if category_count > 0:
+                        sample_categories = data["categories"][:3]  # Show first 3
+                        details += f", Sample: {sample_categories}"
+                else:
+                    success = False
+                    details += f", Invalid response structure: {data}"
+            
+            self.log_test("Drama Categories", success, details)
+            return success, response.json() if success else {}
+        except Exception as e:
+            self.log_test("Drama Categories", False, str(e))
+            return False, {}
+
+    def test_dramas_by_category(self, category):
+        """Test getting dramas by category"""
+        try:
+            payload = {"category": category}
+            response = requests.post(
+                f"{self.api_url}/dramas/by-category", 
+                json=payload, 
+                timeout=30,
+                headers={'Content-Type': 'application/json'}
+            )
+            success = response.status_code == 200
+            details = f"Status: {response.status_code}, Category: '{category}'"
+            
+            if success:
+                data = response.json()
+                if data.get("success"):
+                    result_count = len(data.get("data", []))
+                    details += f", Found {result_count} dramas"
+                    if result_count > 0:
+                        first_drama = data["data"][0]
+                        details += f", Sample: {first_drama.get('bookName', 'Unknown')}"
+                else:
+                    details += f", Category search returned no results: {data.get('message', 'Unknown error')}"
+            
+            self.log_test(f"Category Filter ({category})", success, details)
+            return success, response.json() if success else {}
+        except Exception as e:
+            self.log_test(f"Category Filter ({category})", False, str(e))
+            return False, {}
+
     def test_stream_link(self, book_id, episode=1):
         """Test getting stream link for a drama"""
         try:
