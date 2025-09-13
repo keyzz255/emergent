@@ -213,6 +213,8 @@ const App = () => {
       if (response.data.success) {
         setDramas(response.data.data);
         setIsSearchMode(false);
+        setIsCategoryMode(false);
+        setSelectedCategory("");
       } else {
         setError("Failed to load dramas");
       }
@@ -239,6 +241,8 @@ const App = () => {
       if (response.data.success) {
         setDramas(response.data.data);
         setIsSearchMode(true);
+        setIsCategoryMode(false);
+        setSelectedCategory("");
       } else {
         setError("No results found");
         setDramas([]);
@@ -246,6 +250,39 @@ const App = () => {
     } catch (err) {
       console.error("Error searching dramas:", err);
       setError("Search failed");
+      setDramas([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const selectCategory = async (category) => {
+    setSelectedCategory(category);
+    
+    if (!category) {
+      // Return to latest dramas
+      loadLatestDramas();
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    try {
+      const response = await axios.post(`${API}/dramas/by-category`, {
+        category: category
+      });
+      if (response.data.success) {
+        setDramas(response.data.data);
+        setIsCategoryMode(true);
+        setIsSearchMode(false);
+        setSearchQuery("");
+      } else {
+        setError("No dramas found for this category");
+        setDramas([]);
+      }
+    } catch (err) {
+      console.error("Error loading category dramas:", err);
+      setError("Failed to load category dramas");
       setDramas([]);
     } finally {
       setLoading(false);
