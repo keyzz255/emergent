@@ -114,6 +114,92 @@ async def get_latest_dramas(page: int = 1):
         logger.error(f"Failed to get latest dramas: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch latest dramas")
 
+@api_router.get("/dramas/categories")
+async def get_drama_categories():
+    """Get available drama categories"""
+    try:
+        # Get latest dramas to extract categories
+        token_data = await get_dramabox_token()
+        headers = get_dramabox_headers(token_data)
+        
+        url = f"{DRAMABOX_BASE_URL}/he001/theater"
+        data = {
+            "newChannelStyle": 1,
+            "isNeedRank": 1,
+            "pageNo": 1,
+            "index": 1,
+            "channelId": 43
+        }
+        
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+        
+        result = response.json()
+        categories = set()
+        
+        if result.get("data") and result["data"].get("newTheaterList"):
+            dramas = result["data"]["newTheaterList"]["records"]
+            for drama in dramas:
+                # Extract categories from tags and tagV3s
+                if drama.get("tags"):
+                    categories.update(drama["tags"])
+                if drama.get("tagV3s"):
+                    for tag in drama["tagV3s"]:
+                        if tag.get("tagName"):
+                            categories.add(tag["tagName"])
+        
+        # Sort categories and convert to list
+        sorted_categories = sorted(list(categories))
+        
+        return {
+            "success": True,
+            "categories": sorted_categories
+        }
+            
+    except Exception as e:
+        logger.error(f"Failed to get categories: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch categories")
+
+@api_router.post("/dramas/by-category")
+async def get_dramas_by_category(request: CategoryRequest):
+    """Get dramas filtered by category"""
+    try:
+        # For now, we'll use search functionality to find dramas by category
+        # In a real implementation, you might have a dedicated category endpoint
+        token_data = await get_dramabox_token()
+        headers = get_dramabox_headers(token_data)
+        
+        url = f"{DRAMABOX_BASE_URL}/search/suggest"
+        data = {"keyword": request.category}
+        
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+        
+        result = response.json()
+        if result.get("data") and result["data"].get("suggestList"):
+            # Filter results to only include dramas that actually contain the category
+            filtered_dramas = []
+            for drama in result["data"]["suggestList"]:
+                drama_tags = drama.get("tagNames", [])
+                if isinstance(drama_tags, list):
+                    if request.category in drama_tags:
+                        filtered_dramas.append(drama)
+                elif isinstance(drama_tags, str):
+                    if request.category in drama_tags:
+                        filtered_dramas.append(drama)
+            
+            return {
+                "success": True,
+                "data": filtered_dramas,
+                "category": request.category
+            }
+        else:
+            return {"success": False, "data": [], "message": "No dramas found for this category"}
+            
+    except Exception as e:
+        logger.error(f"Failed to get dramas by category: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch dramas by category")
+
 @api_router.post("/dramas/search")
 async def search_dramas(request: SearchRequest):
     """Search dramas by keyword"""
