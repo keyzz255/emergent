@@ -173,18 +173,37 @@ const LoadingSpinner = () => (
 
 const App = () => {
   const [dramas, setDramas] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchMode, setIsSearchMode] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [isCategoryMode, setIsCategoryMode] = useState(false);
   const [selectedDrama, setSelectedDrama] = useState(null);
   const [streamUrl, setStreamUrl] = useState("");
   const [currentEpisode, setCurrentEpisode] = useState(1);
   const [error, setError] = useState("");
 
-  // Load latest dramas on component mount
+  // Load latest dramas and categories on component mount
   useEffect(() => {
     loadLatestDramas();
+    loadCategories();
   }, []);
+
+  const loadCategories = async () => {
+    setCategoriesLoading(true);
+    try {
+      const response = await axios.get(`${API}/dramas/categories`);
+      if (response.data.success) {
+        setCategories(response.data.categories);
+      }
+    } catch (err) {
+      console.error("Error loading categories:", err);
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
   const loadLatestDramas = async () => {
     setLoading(true);
