@@ -6,7 +6,7 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Components
-const Header = ({ onSearch, searchQuery, setSearchQuery, onCategorySelect, onHome }) => (
+const Header = ({ onSearch, searchQuery, setSearchQuery, onCategorySelect, onHome, categories, selectedCategory, categoriesLoading }) => (
   <header className="bg-gray-900 text-white p-4 shadow-lg">
     <div className="container mx-auto flex items-center justify-between">
       <button 
@@ -16,6 +16,24 @@ const Header = ({ onSearch, searchQuery, setSearchQuery, onCategorySelect, onHom
         DramaBox
       </button>
       <div className="flex items-center space-x-4">
+        {/* Category Dropdown */}
+        <div className="relative">
+          <select
+            value={selectedCategory}
+            onChange={(e) => onCategorySelect(e.target.value)}
+            className="px-4 py-2 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-red-500 focus:outline-none cursor-pointer"
+            disabled={categoriesLoading}
+          >
+            <option value="">Semua Kategori</option>
+            {categories.map((category, index) => (
+              <option key={index} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Search Input */}
         <input
           type="text"
           placeholder="Cari drama..."
