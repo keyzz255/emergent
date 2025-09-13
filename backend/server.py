@@ -46,6 +46,9 @@ class StreamRequest(BaseModel):
     book_id: str
     episode: int = 1
 
+class CategoryRequest(BaseModel):
+    category: str
+
 # DramaBox API Helper Functions
 async def get_dramabox_token():
     """Get authentication token from DramaBox API"""
