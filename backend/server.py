@@ -164,11 +164,55 @@ async def get_drama_categories():
 async def get_dramas_by_category(request: CategoryRequest):
     """Get dramas filtered by category"""
     try:
-        # For now, we'll use search functionality to find dramas by category
-        # In a real implementation, you might have a dedicated category endpoint
+        # First, get the latest dramas to filter by category
         token_data = await get_dramabox_token()
         headers = get_dramabox_headers(token_data)
         
+        url = f"{DRAMABOX_BASE_URL}/he001/theater"
+        data = {
+            "newChannelStyle": 1,
+            "isNeedRank": 1,
+            "pageNo": 1,
+            "index": 1,
+            "channelId": 43
+        }
+        
+        response = requests.post(url, json=data, headers=headers)
+        response.raise_for_status()
+        
+        result = response.json()
+        filtered_dramas = []
+        
+        if result.get("data") and result["data"].get("newTheaterList"):
+            dramas = result["data"]["newTheaterList"]["records"]
+            
+            # Filter dramas by category
+            for drama in dramas:
+                drama_categories = []
+                
+                # Get categories from tags
+                if drama.get("tags"):
+                    drama_categories.extend(drama["tags"])
+                
+                # Get categories from tagV3s
+                if drama.get("tagV3s"):
+                    for tag in drama["tagV3s"]:
+                        if tag.get("tagName"):
+                            drama_categories.append(tag["tagName"])
+                
+                # Check if requested category is in drama's categories
+                if request.category in drama_categories:
+                    filtered_dramas.append(drama)
+        
+        # If we have filtered results from latest, return them
+        if filtered_dramas:
+            return {
+                "success": True,
+                "data": filtered_dramas,
+                "category": request.category
+            }
+        
+        # If no results from latest, try search as fallback
         url = f"{DRAMABOX_BASE_URL}/search/suggest"
         data = {"keyword": request.category}
         
@@ -177,24 +221,24 @@ async def get_dramas_by_category(request: CategoryRequest):
         
         result = response.json()
         if result.get("data") and result["data"].get("suggestList"):
-            # Filter results to only include dramas that actually contain the category
-            filtered_dramas = []
+            # Filter search results to only include dramas that actually contain the category
+            search_filtered = []
             for drama in result["data"]["suggestList"]:
                 drama_tags = drama.get("tagNames", [])
                 if isinstance(drama_tags, list):
                     if request.category in drama_tags:
-                        filtered_dramas.append(drama)
+                        search_filtered.append(drama)
                 elif isinstance(drama_tags, str):
                     if request.category in drama_tags:
-                        filtered_dramas.append(drama)
+                        search_filtered.append(drama)
             
             return {
                 "success": True,
-                "data": filtered_dramas,
+                "data": search_filtered,
                 "category": request.category
             }
-        else:
-            return {"success": False, "data": [], "message": "No dramas found for this category"}
+        
+        return {"success": False, "data": [], "message": "No dramas found for this category"}
             
     except Exception as e:
         logger.error(f"Failed to get dramas by category: {e}")
