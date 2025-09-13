@@ -224,10 +224,20 @@ class DramaBoxAPITester:
         # Test 2: Latest Dramas
         latest_success, latest_data = self.test_latest_dramas()
         
-        # Test 3: Search Dramas
+        # Test 3: Categories
+        categories_success, categories_data = self.test_categories()
+        
+        # Test 4: Category Filter (test with first available category)
+        if categories_success and categories_data.get("categories"):
+            first_category = categories_data["categories"][0]
+            self.test_dramas_by_category(first_category)
+        else:
+            self.log_test("Category Filter", False, "No categories available to test")
+        
+        # Test 5: Search Dramas
         search_success, search_data = self.test_search_dramas("cinta")
         
-        # Test 4: Stream Link (use drama from latest or search)
+        # Test 6: Stream Link (use drama from latest or search)
         book_id = None
         if latest_success and latest_data.get("data"):
             book_id = latest_data["data"][0].get("bookId")
@@ -239,7 +249,7 @@ class DramaBoxAPITester:
         else:
             self.log_test("Stream Link", False, "No valid book_id found from previous tests")
 
-        # Test 5: Status Endpoints
+        # Test 7: Status Endpoints
         self.test_status_endpoints()
 
         # Print Summary
