@@ -329,15 +329,30 @@ const App = () => {
         onSearch={searchDramas}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        onCategorySelect={selectCategory}
+        onHome={loadLatestDramas}
       />
       
       <main className="container mx-auto px-4 py-8">
+        {/* Category Menu */}
+        <CategoryMenu
+          categories={categories}
+          onCategorySelect={selectCategory}
+          selectedCategory={selectedCategory}
+          loading={categoriesLoading}
+        />
+
         {/* Title Section */}
         <div className="mb-8">
           <h2 className="text-white text-2xl font-bold mb-2">
-            {isSearchMode ? `Search Results for "${searchQuery}"` : "Latest Dramas"}
+            {isSearchMode 
+              ? `Search Results for "${searchQuery}"` 
+              : isCategoryMode 
+                ? `Category: ${selectedCategory}` 
+                : "Latest Dramas"
+            }
           </h2>
-          {!isSearchMode && (
+          {!isSearchMode && !isCategoryMode && (
             <p className="text-gray-400">Discover the newest dramas available</p>
           )}
         </div>
