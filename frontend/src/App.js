@@ -33,9 +33,9 @@ const Header = ({ onSearch, searchQuery, setSearchQuery }) => (
 const DramaCard = ({ drama, onPlay }) => (
   <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
     <div className="aspect-video bg-gray-700 flex items-center justify-center">
-      {drama.cover ? (
+      {(drama.cover || drama.coverWap) ? (
         <img
-          src={drama.cover}
+          src={drama.cover || drama.coverWap}
           alt={drama.title || drama.bookName}
           className="w-full h-full object-cover"
         />
@@ -52,7 +52,7 @@ const DramaCard = ({ drama, onPlay }) => (
         {drama.title || drama.bookName || "Untitled"}
       </h3>
       <p className="text-gray-400 text-sm mb-3 line-clamp-3">
-        {drama.description || drama.summary || "No description available"}
+        {drama.description || drama.summary || drama.introduction || "No description available"}
       </p>
       <div className="flex items-center justify-between">
         <span className="text-gray-500 text-xs">
