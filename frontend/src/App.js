@@ -200,7 +200,7 @@ const App = () => {
     
     try {
       const response = await axios.post(`${API}/dramas/stream`, {
-        book_id: drama.id || drama.bookId,
+        book_id: drama.bookId || drama.id,
         episode: episode
       });
       
