@@ -314,17 +314,12 @@ const App = () => {
         setSearchQuery={setSearchQuery}
         onCategorySelect={selectCategory}
         onHome={loadLatestDramas}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        categoriesLoading={categoriesLoading}
       />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Category Menu */}
-        <CategoryMenu
-          categories={categories}
-          onCategorySelect={selectCategory}
-          selectedCategory={selectedCategory}
-          loading={categoriesLoading}
-        />
-
         {/* Title Section */}
         <div className="mb-8">
           <h2 className="text-white text-2xl font-bold mb-2">
