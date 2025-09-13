@@ -53,41 +53,6 @@ const Header = ({ onSearch, searchQuery, setSearchQuery, onCategorySelect, onHom
   </header>
 );
 
-const CategoryMenu = ({ categories, onCategorySelect, selectedCategory, loading }) => (
-  <div className="bg-gray-800 p-4 mb-6 rounded-lg">
-    <h3 className="text-white text-lg font-semibold mb-4">Kategori Drama</h3>
-    {loading ? (
-      <div className="text-gray-400">Loading categories...</div>
-    ) : (
-      <div className="flex flex-wrap gap-2">
-        <button
-          onClick={() => onCategorySelect("")}
-          className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-            selectedCategory === "" 
-              ? "bg-red-600 text-white" 
-              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-          }`}
-        >
-          Semua
-        </button>
-        {categories.map((category, index) => (
-          <button
-            key={index}
-            onClick={() => onCategorySelect(category)}
-            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              selectedCategory === category 
-                ? "bg-red-600 text-white" 
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
-          >
-            {category}
-          </button>
-        ))}
-      </div>
-    )}
-  </div>
-);
-
 const DramaCard = ({ drama, onPlay }) => (
   <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
     <div className="aspect-video bg-gray-700 flex items-center justify-center">
