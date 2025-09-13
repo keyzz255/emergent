@@ -6,10 +6,15 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 // Components
-const Header = ({ onSearch, searchQuery, setSearchQuery }) => (
+const Header = ({ onSearch, searchQuery, setSearchQuery, onCategorySelect, onHome }) => (
   <header className="bg-gray-900 text-white p-4 shadow-lg">
     <div className="container mx-auto flex items-center justify-between">
-      <h1 className="text-2xl font-bold text-red-500">DramaBox</h1>
+      <button 
+        onClick={onHome}
+        className="text-2xl font-bold text-red-500 hover:text-red-400 cursor-pointer"
+      >
+        DramaBox
+      </button>
       <div className="flex items-center space-x-4">
         <input
           type="text"
@@ -28,6 +33,41 @@ const Header = ({ onSearch, searchQuery, setSearchQuery }) => (
       </div>
     </div>
   </header>
+);
+
+const CategoryMenu = ({ categories, onCategorySelect, selectedCategory, loading }) => (
+  <div className="bg-gray-800 p-4 mb-6 rounded-lg">
+    <h3 className="text-white text-lg font-semibold mb-4">Kategori Drama</h3>
+    {loading ? (
+      <div className="text-gray-400">Loading categories...</div>
+    ) : (
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => onCategorySelect("")}
+          className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+            selectedCategory === "" 
+              ? "bg-red-600 text-white" 
+              : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+          }`}
+        >
+          Semua
+        </button>
+        {categories.map((category, index) => (
+          <button
+            key={index}
+            onClick={() => onCategorySelect(category)}
+            className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+              selectedCategory === category 
+                ? "bg-red-600 text-white" 
+                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
 );
 
 const DramaCard = ({ drama, onPlay }) => (
